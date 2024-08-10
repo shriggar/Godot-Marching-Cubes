@@ -21,54 +21,54 @@ var curr_smooth_pitch_vel : float
 
 
 
-func _ready():
-	pass 
+#func _ready():
+	#pass 
 
 
-func _process(delta):
+func _process(delta:float) -> void:
 	# Update smoothed inputs
 	handle_inputs(delta)
 	# Move
-	var velocity_local = Vector3(0, -curr_pitch_t * elevation_speed, speed)
+	var velocity_local := Vector3(0, -curr_pitch_t * elevation_speed, speed)
 	translate_object_local(velocity_local * delta)
 	# Rotate
 	rotate(Vector3(0,-1,0), turn_speed * current_turn_t * delta)
 	# Rotate graphic
 	
-	var target_pitch_angle = curr_pitch_t * deg_to_rad(pitch_angle)
+	var target_pitch_angle := curr_pitch_t * deg_to_rad(pitch_angle)
 	current_pitch_angle = lerp(current_pitch_angle, target_pitch_angle, delta * 8)
 	player_graphic.rotation = Vector3.ZERO
 	player_graphic.rotate(Vector3.FORWARD, -current_roll_t * deg_to_rad(roll_angle))
 	player_graphic.rotate(Vector3.RIGHT, current_pitch_angle)
 	
 	# Update camera
-	var right = basis.x.normalized()
-	var up = basis.y.normalized()
-	var fwd = basis.z.normalized()
+	var right := basis.x.normalized()
+	var up := basis.y.normalized()
+	var fwd := basis.z.normalized()
 	
 	camera.position = position + right * cam_offset.x + up * cam_offset.y + fwd * cam_offset.z
-	var cam_look_target = position + right * cam_look_offset.x + up * cam_look_offset.y + fwd * cam_look_offset.z
+	var cam_look_target := position + right * cam_look_offset.x + up * cam_look_offset.y + fwd * cam_look_offset.z
 	camera.look_at(cam_look_target)
 	
-func handle_inputs(dt):
+func handle_inputs(dt:float) -> void:
 	# Input
-	var turn_dir = get_turn_input()
-	var pitch_dir = get_pitch_input()
+	var turn_dir := get_turn_input()
+	var pitch_dir := get_pitch_input()
 	# Smooth turn
-	var turn_smooth = smooth_towards(current_turn_t, turn_dir, 0.2, curr_smooth_turn_vel, dt)
+	var turn_smooth := smooth_towards(current_turn_t, turn_dir, 0.2, curr_smooth_turn_vel, dt)
 	current_turn_t = turn_smooth.x
 	curr_smooth_turn_vel = turn_smooth.y
 	# Smooth roll
-	var roll_smooth = smooth_towards(current_roll_t, turn_dir, 0.4, curr_smooth_roll_vel, dt)
+	var roll_smooth := smooth_towards(current_roll_t, turn_dir, 0.4, curr_smooth_roll_vel, dt)
 	current_roll_t = roll_smooth.x
 	curr_smooth_roll_vel = roll_smooth.y
 	# Smooth putch
-	var pitch_smooth = smooth_towards(curr_pitch_t, pitch_dir, 0.5, curr_smooth_pitch_vel, dt)
+	var pitch_smooth := smooth_towards(curr_pitch_t, pitch_dir, 0.5, curr_smooth_pitch_vel, dt)
 	curr_pitch_t = pitch_smooth.x
 	curr_smooth_pitch_vel = pitch_smooth.y
 	
 func get_turn_input() -> float : 
-	var t = 0
+	var t := 0
 	if Input.is_action_pressed("Left"):
 		t += -1
 	if Input.is_action_pressed("Right"):
@@ -76,7 +76,7 @@ func get_turn_input() -> float :
 	return t
 	
 func get_pitch_input() -> float : 
-	var t = 0
+	var t := 0
 	if Input.is_action_pressed("Down"):
 		t += -1
 	if Input.is_action_pressed("Up"):
@@ -85,17 +85,17 @@ func get_pitch_input() -> float :
 	
 
 	
-func smooth_towards(curr, target, duration, curr_velocity, dt) -> Vector2:
+func smooth_towards(curr:float, target:float, duration:float, curr_velocity:float, dt:float) -> Vector2:
 	# from unity smoothdamp implementation
-	var smooth_speed = 2 / max(0.0001, duration)
+	var smooth_speed:float = 2 / max(0.0001, duration)
 	
-	var x = smooth_speed * dt
-	var e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x)
-	var offset = curr - target
+	var x := smooth_speed * dt
+	var e := 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var offset := curr - target
 	
-	var temp = (curr_velocity + smooth_speed * offset) * dt
+	var temp :float = (curr_velocity + smooth_speed * offset) * dt
 	curr_velocity = (curr_velocity - smooth_speed * temp) * e
-	var output = target + (offset + temp) * e
+	var output :float = target + (offset + temp) * e
 	
 	if (target-curr > 0) == (output > target):
 		output = target
